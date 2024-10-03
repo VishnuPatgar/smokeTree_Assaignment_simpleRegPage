@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmokeTreeAssagnment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        label {
+            margin: 20px;
+        }
+        input{
+            margin: 10px;
+        }
+
+        button{
+            border-radius: 10%;
+            width: 100px;
+            margin-top: 20px;
+        }
+    
+        div{
+            display: flex;
+            justify-content: center;
+            margin-top: 0px;
+        }
+        h2{
+            text-align: center;
+            margin-top: 100px;
+        }
+        table{
+            background-color: antiquewhite;
+        }
+    </style>
+</head>
+<body>
+    <form id="userForm">
+        <h1>User Address Form</h1>
+        <label for="name">Name:</label>
+        <input type="text" id="name" required>
+        <br>
+        <label for="address">Address:</label>
+        <input type="text" id="address" required>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+
+
+    <h2>User List</h2>
+    <div>
+    <table id="userTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Address</th>
+            </tr>
+        </thead>
+        <tbody id="userList"></tbody>
+    </table>
+</div>
+    <script>
+        async function fetchUsers() {
+            try {
+                const response = await fetch('http://localhost:3333/users');
+                const users = await response.json();
+                const userList = document.getElementById('userList');
+                userList.innerHTML = ''; 
+
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    const nameCell = document.createElement('td'); 
+                    const addressCell = document.createElement('td');
+
+                    nameCell.textContent = user.name;
+                    addressCell.textContent = user.address || 'No address provided';
+                    row.appendChild(nameCell);
+                    row.appendChild(addressCell);
+                    userList.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+        }
+
+        // submit form
+        document.getElementById('userForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const address = document.getElementById('address').value;
+
+            try {
+                const response = await fetch('http://localhost:3333/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, address })
+                });
+
+                if (response.ok) {
+                    alert('User and address saved successfully!');
+                    fetchUsers(); 
+                    document.getElementById('userForm').reset(); 
+                } else {
+                    alert('Failed to save user and address.');
+                }
+            } catch (error) {
+                console.error('Error saving user:', error);
+            }
+        });
+
+        // onloading page
+        window.onload = fetchUsers;
+    </script>
+</body>
+</html>
